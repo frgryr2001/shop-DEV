@@ -62,6 +62,10 @@ userSchema.methods.createKeyPair = async function () {
   return { privateKey, publicKey };
 };
 
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
 const User = model(DOCUMENT_NAME, userSchema);
 
 export default User;
