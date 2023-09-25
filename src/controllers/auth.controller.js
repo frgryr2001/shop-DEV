@@ -26,8 +26,14 @@ class AuthController {
   });
 
   handlerRefreshToken = catchAsync(async (req, res, next) => {
-    const { refreshToken } = req.body;
-    const result = await AuthService.handlerRefreshToken(refreshToken, next);
+    const result = await AuthService.handlerRefreshToken(
+      {
+        refreshToken: req.refreshToken,
+        user: req.user,
+        keyStore: req.keyStore
+      },
+      next
+    );
     return response(result, res);
   });
 }

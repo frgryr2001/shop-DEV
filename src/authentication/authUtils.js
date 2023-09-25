@@ -8,7 +8,8 @@ import jwt from 'jsonwebtoken';
 const HEADER = {
   API_KEY: 'x-api-key',
   CLIENT_ID: 'x-client-id',
-  AUTHORIZATION: 'authorization'
+  AUTHORIZATION: 'authorization',
+  REFRESHTOKEN: 'x-rtoken-id'
 };
 export const createTokenPair = async (payload, publicKey, privateKey) => {
   try {
@@ -65,6 +66,52 @@ export const authenticated = catchAsync(async (req, res, next) => {
       );
     }
     req.keyStore = keyStore;
+    req.user = decodeUser;
+    return next();
+  }
+});
+
+export const authenticatedV2 = catchAsync(async (req, res, next) => {
+  const userId = req.headers[HEADER.CLIENT_ID];
+  if (!userId) {
+    return next(new AppError('Invalid Request ', StatusCode.UNAUTHORIZED));
+  }
+
+  const keyStore = await KeyTokenService.findByUserId(userId);
+  if (!keyStore) {
+    return next(new AppError('Not found keyStore ', StatusCode.NOT_FOUND));
+  }
+
+  if (req.headers[HEADER.REFRESHTOKEN]) {
+    const refreshToken = req.headers[HEADER.REFRESHTOKEN];
+    const decodeUser = jwt.verify(refreshToken, keyStore.privateKey);
+    if (userId !== decodeUser.userId) {
+      return next(
+        new AppError('UNAUTHORIZED , invalid userId', StatusCode.UNAUTHORIZED)
+      );
+    }
+    req.keyStore = keyStore;
+    req.user = decodeUser;
+    req.refreshToken = refreshToken;
+    return next();
+  }
+
+  if (req.headers.authorization?.startsWith('Bearer')) {
+    const accessToken = req.headers.authorization.split(' ')[1];
+    if (!accessToken) {
+      return next(
+        new AppError('UNAUTHORIZED , invalid request', StatusCode.UNAUTHORIZED)
+      );
+    }
+
+    const decodeUser = jwt.verify(accessToken, keyStore.publicKey);
+    if (userId !== decodeUser.userId) {
+      return next(
+        new AppError('UNAUTHORIZED , invalid userId', StatusCode.UNAUTHORIZED)
+      );
+    }
+    req.keyStore = keyStore;
+    req.user = decodeUser;
     return next();
   }
 });

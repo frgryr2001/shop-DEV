@@ -22,9 +22,8 @@ class KeyTokenService {
   static async findByUserId(userId) {
     const keyToken = await KeyToken.findOne({
       user: userId
-    }).lean();
+    });
 
-    console.log('keyToken', keyToken);
     return keyToken;
   }
 

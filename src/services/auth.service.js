@@ -103,55 +103,36 @@ class AuthService {
     };
   }
 
-  static async handlerRefreshToken(refreshToken, next) {
-    // Check token da duoc su dung chua
-    const foundRefreshToken =
-      await KeyTokenService.findByRefreshTokenUsed(refreshToken);
-
-    if (foundRefreshToken) {
-      // decode token
-      const decoded = await verifyToken(
-        refreshToken,
-        foundRefreshToken.privateKey
-      );
-      const { userId } = decoded;
-      // xoa tat ca cac keyToken cua userId
+  static async handlerRefreshToken({ refreshToken, user, keyStore }, next) {
+    const { userId, email } = user;
+    if (keyStore.refreshTokensUsed.includes(refreshToken)) {
       await KeyTokenService.deleteKeyByUserId(userId);
       return next(new AppError('Something wrong happen !! Pls re login', 403));
     }
-
-    // Not found
-    const holderToken = await KeyTokenService.findByRefreshToken(refreshToken);
-    if (!holderToken) {
+    if (keyStore.refreshToken !== refreshToken) {
       return next(new AppError('Invalid refreshToken', 403));
     }
 
-    const decoded = await verifyToken(refreshToken, holderToken.privateKey);
-    const { userId, email } = decoded;
-
-    const user = await findByEmail(email);
-    if (!user) {
+    const userShop = await findByEmail(email);
+    if (!userShop) {
       return next(new AppError('Invalid refreshToken', 403));
     }
     //  cap lai 1 cap token moi cho user
     const tokens = await createTokenPair(
       { userId, email },
-      holderToken.publicKey,
-      holderToken.privateKey
+      keyStore.publicKey,
+      keyStore.privateKey
     );
     // update refreshToken moi vao db
-    holderToken.refreshToken = tokens.refreshToken;
-    holderToken.refreshTokensUsed.push(refreshToken); // push refreshToken cu vao mang refreshTokensUsed
-    await holderToken.save();
+    keyStore.refreshToken = tokens.refreshToken;
+    keyStore.refreshTokensUsed.push(refreshToken); // push refreshToken cu vao mang refreshTokensUsed
+    await keyStore.save();
 
     return {
       statusCode: 200,
       message: 'Refresh token successfully',
       data: {
-        user: getInfoData({
-          fields: ['_id', 'email', 'name', 'roles'],
-          object: user.toObject()
-        }),
+        user,
         tokens
       }
     };

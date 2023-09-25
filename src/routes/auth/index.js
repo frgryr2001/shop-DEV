@@ -1,4 +1,4 @@
-import { authenticated } from '@/authentication/authUtils';
+import { authenticatedV2 } from '@/authentication/authUtils';
 import authController from '@/controllers/auth.controller';
 import express from 'express';
 
@@ -8,7 +8,7 @@ router.post('/shop/signUp', authController.signUp);
 router.post('/shop/signIn', authController.signIn);
 
 // check authentication
-router.use(authenticated);
+router.use(authenticatedV2);
 
 // logout
 router.post('/shop/logout', authController.logout);
