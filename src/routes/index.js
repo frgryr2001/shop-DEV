@@ -9,7 +9,7 @@ router.use(apiKey);
 
 // check permission
 router.use(permission('0000'));
-router.use('/v1', authRouter);
-router.use('/v1', productRouter);
+router.use('/v1/shop/auth', authRouter);
+router.use('/v1/shop/product', productRouter);
 
 export default router;

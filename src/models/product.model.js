@@ -1,3 +1,4 @@
+/* eslint-disable space-before-function-paren */
 import { Schema, model } from 'mongoose';
 import slugify from 'slugify';
 
@@ -71,19 +72,24 @@ const productSchema = new Schema(
     collection: COLLECTION_NAME
   }
 );
-// eslint-disable-next-line space-before-function-paren
+
 productSchema.pre('save', async function (next) {
   this.productSlug = slugify(this.productName, { lower: true });
   next();
 });
+// productSchema.pre(/^find/, function (next) {
+//   this.find({
+//     isDraft: { $ne: true }
+//   });
+//   next();
+// });
 
 // define the product type = clothes
 
 const clothingSchema = new Schema(
   {
     brand: {
-      type: String,
-      required: true
+      type: String
     },
     size: String,
     material: String,
@@ -100,7 +106,7 @@ const clothingSchema = new Schema(
 
 // define the product type = electronics
 
-const electronicSchema = new Schema(
+const furnitureSchema = new Schema(
   {
     brand: {
       type: String,
@@ -119,7 +125,7 @@ const electronicSchema = new Schema(
   }
 );
 
-const furnitureSchema = new Schema(
+const electronicSchema = new Schema(
   {
     manufacturer: {
       type: String,
@@ -137,6 +143,9 @@ const furnitureSchema = new Schema(
     collection: 'furniture'
   }
 );
+
+// create index for search product
+productSchema.index({ productName: 'text', productDescription: 'text' });
 
 const Product = model(DOCUMENT_NAME, productSchema, COLLECTION_NAME);
 const Clothing = model('Clothing', clothingSchema, 'clothes');

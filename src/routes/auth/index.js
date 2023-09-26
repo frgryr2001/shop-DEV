@@ -4,14 +4,14 @@ import express from 'express';
 
 const router = express.Router();
 
-router.post('/shop/signUp', authController.signUp);
-router.post('/shop/signIn', authController.signIn);
+router.post('/signUp', authController.signUp);
+router.post('/signIn', authController.signIn);
 
 // check authentication
 router.use(authenticatedV2);
 
 // logout
-router.post('/shop/logout', authController.logout);
-router.post('/shop/refreshToken', authController.handlerRefreshToken);
+router.post('/logout', authController.logout);
+router.post('/refreshToken', authController.handlerRefreshToken);
 
 export default router;

@@ -16,8 +16,117 @@ class ProductController {
     });
   });
 
+  publishProductByShop = catchAsync(async (req, res, next) => {
+    const { id } = req.params;
+    const { userId } = req.user;
+    const isPublished = await ProductService.publishProductByShop({
+      productId: id,
+      productShop: userId
+    });
+    if (!isPublished) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: 'Cannot publish product'
+      });
+    }
+    return res.status(StatusCodes.OK).json({
+      statusCode: StatusCodes.OK,
+      message: 'Publish product successfully'
+    });
+  });
+
+  unPublishProductByShop = catchAsync(async (req, res, next) => {
+    const { id } = req.params;
+    const { userId } = req.user;
+    const isUnPublished = await ProductService.unPublishProductByShop({
+      productId: id,
+      productShop: userId
+    });
+    if (!isUnPublished) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: 'Cannot unpublish product'
+      });
+    }
+    return res.status(StatusCodes.OK).json({
+      statusCode: StatusCodes.OK,
+      message: 'Unpublish product successfully'
+    });
+  });
+
+  /**
+   * Get all draft product for shop
+   * @param {Number} page
+   * @param {Number} limit
+   * @returns {Promise<Product[]>} products
+   *
+   */
   getAllDraftForShop = catchAsync(async (req, res, next) => {
-    const products = await ProductService.findAllDraftForShop({});
+    const { page, limit } = req.query;
+    const products = await ProductService.findAllDraftForShop({
+      productShop: req.user.userId,
+      page,
+      limit
+    });
+    return res.status(StatusCodes.OK).json({
+      statusCode: StatusCodes.OK,
+      message: 'Get list product successfully',
+      resultCount: products.length,
+      data: products
+    });
+  });
+
+  /**
+   * Get all published product for shop
+   * @param {Number} page
+   * @param {Number} limit
+   * @returns {Promise<Product[]>} products
+   *
+   * */
+  getAllPublishedForShop = catchAsync(async (req, res, next) => {
+    const { page, limit } = req.query;
+    const products = await ProductService.findAllPublishedForShop({
+      productShop: req.user.userId,
+      page,
+      limit
+    });
+    return res.status(StatusCodes.OK).json({
+      statusCode: StatusCodes.OK,
+      message: 'Get list product successfully',
+      resultCount: products.length,
+      data: products
+    });
+  });
+
+  getAllProductsBySearch = catchAsync(async (req, res, next) => {
+    const { keySearch } = req.params;
+    const products = await ProductService.searchProducts({ keySearch });
+    return res.status(StatusCodes.OK).json({
+      statusCode: StatusCodes.OK,
+      message: 'Get list product successfully',
+      data: products
+    });
+  });
+
+  /**
+   * Get all products
+   *  'page', 'sort', 'limit', 'fields' in queryString
+   * @param {
+   *    page: Number,
+   *    limit: Number,
+   *    sort: String,
+   *    fields: String
+   * } queryString
+   * @returns {Promise<Product[]>} products
+   */
+  getAllProducts = catchAsync(async (req, res, next) => {
+    const products = await ProductService.findAllProducts(req.query);
+    return res.status(StatusCodes.OK).json({
+      statusCode: StatusCodes.OK,
+      message: 'Get list product successfully',
+      resultCount: products.length,
+      data: products
+    });
   });
 }
 

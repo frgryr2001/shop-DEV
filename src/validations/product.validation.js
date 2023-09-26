@@ -1,9 +1,9 @@
+/* eslint-disable space-before-function-paren */
 import AppError from '@/utils/AppError';
 import { catchAsync } from '@/utils/catchAsync';
 import { StatusCodes } from 'http-status-codes';
 import joi from 'joi';
 
-// eslint-disable-next-line space-before-function-paren
 const create = catchAsync(async (req, res, next) => {
   const schema = joi.object({
     productName: joi.string().required(),
@@ -33,6 +33,36 @@ const create = catchAsync(async (req, res, next) => {
   next();
 });
 
+const update = catchAsync(async (req, res, next) => {
+  const schema = joi.object({
+    productName: joi.string(),
+    productThumbnail: joi.string(),
+    productPrice: joi.number(),
+    productQuantity: joi.number(),
+    productDescription: joi.string(),
+    productType: joi.string(),
+    productAttributes: joi.when('productType', {
+      is: 'electronic',
+      then: joi.object({
+        manufacturer: joi.string(),
+        model: joi.string(),
+        color: joi.string()
+      }),
+      otherwise: joi.object({
+        brand: joi.string(),
+        size: joi.string(),
+        material: joi.string()
+      })
+    })
+  });
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return next(new AppError(error.message, StatusCodes.BAD_REQUEST));
+  }
+  next();
+});
+
 export const productValidation = {
-  create
+  create,
+  update
 };

@@ -6,7 +6,14 @@ import {
   Clothing as ClothingModel,
   Furniture as FurnitureModel
 } from '@/models/product.model';
-import { findAllDraftForShop } from '@/models/repositories/product.repo';
+import {
+  findAllDraftForShop,
+  findAllProducts,
+  findAllPublishedForShop,
+  publishProductByShop,
+  searchProducts,
+  unPublishProductByShop
+} from '@/models/repositories/product.repo';
 import AppError from '@/utils/AppError';
 
 class ProductFactory {
@@ -24,10 +31,34 @@ class ProductFactory {
     return new ProductClass(payload).createProduct();
   }
 
+  static async publishProductByShop({ productId, productShop }) {
+    return await publishProductByShop({ productId, productShop });
+  }
+
+  static async unPublishProductByShop({ productId, productShop }) {
+    return await unPublishProductByShop({ productId, productShop });
+  }
+
   //   query
   static async findAllDraftForShop({ productShop, page, limit }) {
     const query = { productShop, isDraft: true };
     return await findAllDraftForShop({ query, queryString: { page, limit } });
+  }
+
+  static async findAllPublishedForShop({ productShop, page, limit }) {
+    const query = { productShop, isPublished: true };
+    return await findAllPublishedForShop({
+      query,
+      queryString: { page, limit }
+    });
+  }
+
+  static async searchProducts({ keySearch }) {
+    return await searchProducts({ keySearch });
+  }
+
+  static async findAllProducts(queryString) {
+    return await findAllProducts(queryString);
   }
 }
 
