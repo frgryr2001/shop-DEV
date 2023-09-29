@@ -1,5 +1,6 @@
 import compression from 'compression';
 import express from 'express';
+import { serve, setup } from 'swagger-ui-express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
@@ -12,6 +13,7 @@ import { errorController as globalErrorHandler } from './controllers/error.contr
 // init db
 import '@/dbs/init.mongodb.js';
 import AppError from './utils/AppError';
+import { swaggerDocs } from './configs/swagger.config';
 
 dotenv.config();
 
@@ -41,6 +43,7 @@ app.use(xss());
 
 // init routes
 
+app.use('/api/v1/apis-doc', serve, setup(swaggerDocs));
 app.use('/api', router);
 
 // handling error

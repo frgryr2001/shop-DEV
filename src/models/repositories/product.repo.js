@@ -75,3 +75,29 @@ export const findAllProducts = async (queryString) => {
   feature.filter().sort().fields().paginate();
   return await feature.exec();
 };
+
+export const findProductById = async (productId) => {
+  const feature = new ApiFeatures(
+    Product.find({
+      isPublished: true
+    }),
+    {
+      _id: productId,
+      fields: '-__v'
+    }
+  )
+    .filter()
+    .fields();
+  return await feature.exec();
+};
+
+export const updateProductId = async ({
+  productId,
+  updateData,
+  model,
+  isNew = true
+}) => {
+  return await model.findByIdAndUpdate(productId, updateData, {
+    new: isNew
+  });
+};

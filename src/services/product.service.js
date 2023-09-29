@@ -6,14 +6,18 @@ import {
   Clothing as ClothingModel,
   Furniture as FurnitureModel
 } from '@/models/product.model';
+import { insertInventory } from '@/models/repositories/inventory.repo';
 import {
   findAllDraftForShop,
   findAllProducts,
   findAllPublishedForShop,
+  findProductById,
   publishProductByShop,
   searchProducts,
-  unPublishProductByShop
+  unPublishProductByShop,
+  updateProductId
 } from '@/models/repositories/product.repo';
+import { updateNestedObjectParser } from '@/utils';
 import AppError from '@/utils/AppError';
 
 class ProductFactory {
@@ -29,6 +33,14 @@ class ProductFactory {
       throw new AppError('Cannot create product', 400);
     }
     return new ProductClass(payload).createProduct();
+  }
+
+  static async updateProduct({ productId, productType, payload }) {
+    const ProductClass = this.productRegister[productType];
+    if (!ProductClass) {
+      throw new AppError('Cannot create product', 400);
+    }
+    return new ProductClass(payload).updateProduct(productId);
   }
 
   static async publishProductByShop({ productId, productShop }) {
@@ -60,6 +72,10 @@ class ProductFactory {
   static async findAllProducts(queryString) {
     return await findAllProducts(queryString);
   }
+
+  static async findProductById(productId) {
+    return await findProductById(productId);
+  }
 }
 
 class Product {
@@ -84,7 +100,24 @@ class Product {
   }
 
   async createProduct(productId) {
-    return await ProductModel.create({ ...this, _id: productId });
+    const product = await ProductModel.create({ ...this, _id: productId });
+    if (!product) {
+      throw new AppError('Cannot create product', 400);
+    }
+    await insertInventory({
+      productId,
+      shopId: this.productShop,
+      stock: this.productQuantity
+    });
+    return product;
+  }
+
+  async updateProduct(productId, updateData) {
+    return await updateProductId({
+      productId,
+      updateData,
+      model: ProductModel
+    });
   }
 }
 
@@ -119,6 +152,25 @@ class Clothing extends Product {
       throw new AppError('Cannot create product', 400);
     }
     return newProduct;
+  }
+
+  async updateProduct(productId) {
+    const objParams = this;
+
+    if (objParams.productAttributes) {
+      // update child
+      await updateProductId({
+        productId,
+        updateData: updateNestedObjectParser(objParams.productAttributes),
+        model: ClothingModel
+      });
+    }
+
+    const updateProduct = await super.updateProduct(
+      productId,
+      updateNestedObjectParser(objParams)
+    );
+    return updateProduct;
   }
 }
 

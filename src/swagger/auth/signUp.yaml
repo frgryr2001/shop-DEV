@@ -1,0 +1,51 @@
+paths:
+  /api/v1/shop/auth/signUp:
+    post:
+      tags:
+        - Authentication
+      summary: Sign Up API
+      operationId: signUp
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Sign Up API
+          required: true
+          schema:
+            $ref: '#/components/schemas/SignUpRequest'
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-RateLimit-Limit:
+              type: integer
+              description: Request limit per hour.
+            X-RateLimit-Remaining:
+              type: integer
+              description: The number of requests left for the time window.
+            X-RateLimit-Reset:
+              type: string
+              format: date-time
+              description: The UTC date/time at which the current rate limit window resets.
+          application/json:
+            schema:
+              type: object
+              properties:
+                statusCode:
+                  type: number
+                message:
+                  type: string
+                data:
+                  # $ref: '#/components/schemas/SignUpResponse'
+
+        # '400':
+        #   description: Bad Request
+        #   schema:
+        #     $ref: '#/definitions/ErrorResponse'
+        # '500':
+        #   description: Internal Server Error
+        #   schema:
+        #     $ref: '#/definitions/ErrorResponse'

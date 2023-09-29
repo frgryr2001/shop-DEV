@@ -16,6 +16,21 @@ class ProductController {
     });
   });
 
+  updateProduct = catchAsync(async (req, res, next) => {
+    const { id } = req.params;
+    const { productType } = req.body;
+    const updatedProduct = await ProductService.updateProduct({
+      productId: id,
+      productType,
+      payload: req.body
+    });
+    return res.status(StatusCodes.OK).json({
+      statusCode: StatusCodes.OK,
+      message: 'Update product successfully',
+      data: updatedProduct
+    });
+  });
+
   publishProductByShop = catchAsync(async (req, res, next) => {
     const { id } = req.params;
     const { userId } = req.user;
@@ -126,6 +141,22 @@ class ProductController {
       message: 'Get list product successfully',
       resultCount: products.length,
       data: products
+    });
+  });
+
+  getProductById = catchAsync(async (req, res, next) => {
+    const { id } = req.params;
+    const product = await ProductService.findProductById(id);
+    if (!product) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        statusCode: StatusCodes.NOT_FOUND,
+        message: 'Product not found'
+      });
+    }
+    return res.status(StatusCodes.OK).json({
+      statusCode: StatusCodes.OK,
+      message: 'Get product successfully',
+      data: product
     });
   });
 }

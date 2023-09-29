@@ -1,0 +1,57 @@
+components:
+  schemas:
+    SignUpRequest:
+      type: object
+      description: Sign up request data
+      properties:
+        name:
+          type: string
+          description: your name
+          example: 'John Doe'
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+      required:
+        - email
+        - password
+        - name
+    SignUpResponse:
+      type: object
+      description: Sign up response data
+      properties:
+        token:
+          type: object
+          description: token info
+          properties:
+            accessToken:
+              type: string
+              description: access token
+            refreshToken:
+              type: string
+              description: refresh token
+        user:
+          type: object
+          description: user info
+          properties:
+            id:
+              type: integer
+              description: user id
+              example: 1
+            name:
+              type: string
+              description: user name
+              example: 'John Doe'
+            email:
+              type: string
+              description: user email
+              example: 'test@gmail.com'
+            roles:
+              type: array
+              description: user roles
+              items:
+                type: string
+                description: role
+                example: 'SHOP'

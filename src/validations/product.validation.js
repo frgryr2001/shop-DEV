@@ -40,7 +40,11 @@ const update = catchAsync(async (req, res, next) => {
     productPrice: joi.number(),
     productQuantity: joi.number(),
     productDescription: joi.string(),
-    productType: joi.string(),
+    productType: joi.string().required().messages({
+      'string.required': 'Product type is required',
+      'string.base': 'Product type must have type of string',
+      'any.only': 'Product type must be either electronic or clothing'
+    }),
     productAttributes: joi.when('productType', {
       is: 'electronic',
       then: joi.object({
